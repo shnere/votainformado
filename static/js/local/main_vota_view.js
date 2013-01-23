@@ -9,7 +9,7 @@
 // Twitter
 !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
 $(window).load(function(){
-	
+
 	var mostrar_back_to_top = true;
 	$(function() {
 	  var a = function() {
@@ -43,7 +43,7 @@ $(window).load(function(){
 jQuery(document).ready(function($) {
 	// Primero se hace chequeo para borrar localStorage
 	checkLastVisit();
-	
+
 	var votos_favor;
 	if (localStorage.getItem('votos')) {
 		// Obtener json y hacer un push del ultimo dato
@@ -58,12 +58,12 @@ jQuery(document).ready(function($) {
 		event.preventDefault();
 		// Incrementa votos a favor
 		votos_favor++;
-		
+
 		// Hacer todo en caso de que no este desactivado
 		if(!$(this).hasClass('disabled')){
-			
+
 			var propuesta = $(this).attr('propuesta');
-			
+
 			$.ajax({
 			   	type: "POST",
 			   	url: base_url+"main/voto_favor",
@@ -76,7 +76,7 @@ jQuery(document).ready(function($) {
 							actualizar_local_storage(propuesta, 1);
 						}
 					} else {
-						
+
 					}
 				},
 				error: function(data){
@@ -90,19 +90,19 @@ jQuery(document).ready(function($) {
 			nombreCandidato = $(this).attr('candidato');
 			idCandidato 	= $(this).attr('candidatoID');
 			incremento_local_storage_candidatos(idCandidato, nombreCandidato);
-			
+
 			// Muestro a pie chart of my favourite bars
 			checkStorageCandidato();
 		}
 	});
-	
+
 	// Onclick Voto en contra
 	$('.voto_contra').live('click',function (event){
 		event.preventDefault();
 		// Hacer todo en caso de que no este desactivado
 		if(!$(this).hasClass('disabled')){
 			var propuesta = $(this).attr('propuesta');
-			
+
 			$.ajax({
 			   	type: "POST",
 			   	url: base_url+"main/voto_contra",
@@ -112,7 +112,7 @@ jQuery(document).ready(function($) {
 						// Set Local Storage
 						actualizar_local_storage(propuesta, 0);
 					} else {
-						
+
 					}
 				},
 				error: function(data){
@@ -120,11 +120,11 @@ jQuery(document).ready(function($) {
 					return;
 				}
 			});
-			
+
 			muestra_propuesta_contra($(this));
 		}
 	});
-	
+
 	function muestra_propuesta_contra(obj){
 		// Desactiva ambos botones
 		obj.addClass('disabled');
@@ -138,7 +138,7 @@ jQuery(document).ready(function($) {
 		// Muestra votos
 		cambia_botones_a_votos(obj,'contra');
 	}
-	
+
 	function muestra_propuesta_favor(obj){
 		// Cambia de color todo el renglon usando el atributo rel
 		obj.closest('.propuesta').addClass(obj.attr('rel'));
@@ -152,7 +152,7 @@ jQuery(document).ready(function($) {
 		// Muestra votos
 		cambia_botones_a_votos(obj,'favor');
 	}
-	
+
 	function cambia_botones_a_votos(obj,tipo_voto){
 		if(tipo_voto == 'favor') {
 			// obj es .voto_favor
@@ -164,13 +164,13 @@ jQuery(document).ready(function($) {
 			obj.prev().html(obj.prev().attr('votos'));
 		}
 	}
-	
+
 	// Back To Top
 	$('a.backToTop').click(function(event){
 		event.preventDefault();
 		$('html, body').animate({scrollTop: '0px'}, 300);
 	});
-	
+
 	// Infinite scroll
 	//var max 	 = <?php echo $max; ?>; defined in main
 	var last	 = 0; // Si ya mostro mensaje de que no hay mas propuestas
@@ -182,37 +182,40 @@ jQuery(document).ready(function($) {
 		pagination: ".pagination",
 		next: "a.next",
 		loader: "static/img/loading.gif",
-		onPageChange: function(pageNum, pageUrl, scrollOffset) { 
+		onPageChange: function(pageNum, pageUrl, scrollOffset) {
 			if(pageNum == max && last < 1) {
 				last++;
 				$('.propaside').append('<div class="row span9">Por el momento no contamos con más propuestas, pero puedes <a href="'+base_url+'propuesta/agrega" title="Agregar">agregar una.</a></div>');
 			}
 			// Checa localStorage
-			if(pageNum > pageMax) {
-				checkStorage();
-				pageMax = pageNum;
-			}
-		} 
+			//if(pageNum > pageMax) {
+			//	checkStorage();
+			//	pageMax = pageNum;
+			//}
+		},
+			onRenderComplete: function(items) {
+			checkStorage();
+		}
 	});
-	
+
 	/****************************************************
 	 *													*
 	 *					Local Storage					*
 	 *													*
 	 ***************************************************/
-	
+
 	// Checa localStorage, aplica los que ya fueron votados
 	function checkStorage(offset){
 		if(!localStorage)
 			return;
-			
+
 		// Checar si es valor opcional
 		offset = (typeof offset == "undefined") ? -1 : offset;
-		
+
 		// Si existe localStorage de votos
 		if(localStorage.getItem('votos')){
 			var votos = JSON.parse(localStorage.getItem('votos'));
-			
+
 			for(i=0;i<votos.length;i++){
 				// Obtener selector con el id de la propuesta con atributo propuesta
 				var renglon = $('.voto_contra[propuesta="'+ votos[i].id +'"]');
@@ -222,9 +225,9 @@ jQuery(document).ready(function($) {
 					muestra_propuesta_contra(renglon);
 				}
 			}
-		}	
+		}
 	}
-	
+
 	// Actualiza el localStorage, recibe el id de la propuesta y la opcion
 	// 0 es en contra y 1 es a favor
 	function actualizar_local_storage(idPropuesta, opcion){
@@ -235,7 +238,7 @@ jQuery(document).ready(function($) {
 				// Obtener json y hacer un push del ultimo dato
 				var votos = JSON.parse(localStorage.getItem('votos'));
 				votos.push({'id':parseInt(idPropuesta), 'opcion' : opcion});
-				
+
 				localStorage.setItem('votos', JSON.stringify(votos));
 			} else {
 				// Crear nuevo json con el valor
@@ -246,27 +249,27 @@ jQuery(document).ready(function($) {
 			}
 		}
 	}
-	
+
 	// Borra todo el localStorage
 	function clear_local_storage(){
 		localStorage.removeItem("votos");
 		localStorage.removeItem("candidatos");
 	}
-	
+
 	// Checa si ya se ha votado
 	function checkStorageCandidato(){
 		if(!localStorage)
 			return;
-			
+
 		if(localStorage.getItem('candidatos')){
 			if(votos_favor > 4){
 				$('.mis_resultados').removeClass('hidden');
 				drawChart();
 			}
 		}
-		
+
 	}
-	
+
 	// Checa si se debe de borrar el localStorage, usado en caso de que se
 	// necesite borrar el localStorage por que hubieron cambios
 	function checkLastVisit(){
@@ -283,17 +286,17 @@ jQuery(document).ready(function($) {
 			localStorage.setItem('vota_ultima_visita', current_time);
 		}
 	}
-	
+
 	// localStorage de candidatos
 	function incremento_local_storage_candidatos(idCandidato,nombreCandidato){
 		// Checa que se soporte localStorage
 		if(localStorage) {
 			// Checar si ya existe un json de candidatos
 			if (localStorage.getItem('candidatos')) {
-				
+
 				// Obtener json y hacer un push del ultimo dato
 				var candidatos = JSON.parse(localStorage.getItem('candidatos'));
-				
+
 				existe = false; // Bool para checar si ya esta agregado ese candidato
 				// Buscar si existe, si existe lo agrega
 				for(i=0;i<candidatos.length;i++){
@@ -302,12 +305,12 @@ jQuery(document).ready(function($) {
 						existe = true;
 					}
 				}
-				
+
 				// Si no existe ese candidato en localStorage lo crea con 1 voto
 				if (existe == false) {
 					candidatos.push({'id':parseInt(idCandidato), 'nombre' : nombreCandidato, 'votos' : 1});
 				}
-				
+
 				localStorage.setItem('candidatos', JSON.stringify(candidatos));
 			} else {
 				// Crear nuevo json con un voto y lo agrega a localStorage
@@ -318,11 +321,11 @@ jQuery(document).ready(function($) {
 			}
 		}
 	}
-	
+
 	// Primer chequeo de localStorage
 	checkStorage();
 	checkStorageCandidato();
-	
+
 	// Info popover
     $(function () {
       $("div[popover=popover]")
@@ -363,7 +366,7 @@ function drawChart() {
 				}
 			} else {
 				data.addRow(['Test',0]);
-			}	
+			}
 		}
 
 	}
